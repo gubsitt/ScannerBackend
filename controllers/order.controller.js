@@ -2,14 +2,17 @@ const { sql, poolPromise } = require('../config/dbConfig');
 
 
 exports.getOrders = async (req, res) => {
-    try {
-      const pool = await poolPromise;
-      const result = await pool.request().query('SELECT * FROM Trans_PickingCheckHead');
-      res.json(result.recordset);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  };
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT * FROM Trans_PickingCheckHead
+      WHERE CAST(F_sendDate AS DATE) = CAST(GETDATE() AS DATE)
+    `);
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 
   exports.getOrder = async (req, res) => {
