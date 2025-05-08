@@ -10,6 +10,30 @@ exports.scanSerialNumber = async (req, res) => {
   try {
     const pool = await poolPromise;
 
+    const qtyResult = await pool.request()
+      .input('saleOrderNo', sql.VarChar, saleOrderNo)
+      .input('productId', sql.VarChar, productId)
+      .input('index', sql.Int, index)
+      .query(`
+        SELECT F_Qty FROM Trans_PickingCheckDetail
+        WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
+      `);
+    const requiredQty = qtyResult.recordset[0]?.F_Qty;
+
+    const countResult = await pool.request()
+      .input('saleOrderNo', sql.VarChar, saleOrderNo)
+      .input('productId', sql.VarChar, productId)
+      .input('index', sql.Int, index)
+      .query(`
+        SELECT COUNT(*) AS scannedQty FROM Trans_ProductSN
+        WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
+      `);
+    const scannedQty = countResult.recordset[0]?.scannedQty;
+
+    if (scannedQty >= requiredQty) {
+      return res.status(400).json({ error: 'สแกนครบจำนวนแล้ว ไม่สามารถสแกนเพิ่มได้' });
+    }
+
     const existing = await pool.request()
       .input('productSN', sql.VarChar, productSN)
       .query('SELECT * FROM Trans_ProductSN WHERE F_ProductSN = @productSN');
@@ -28,7 +52,7 @@ exports.scanSerialNumber = async (req, res) => {
         VALUES (@saleOrderNo, @productId, @index, @productSN)
       `);
 
-    const countResult = await pool.request()
+    const countResultAfter = await pool.request()
       .input('saleOrderNo', sql.VarChar, saleOrderNo)
       .input('productId', sql.VarChar, productId)
       .input('index', sql.Int, index)
@@ -36,31 +60,20 @@ exports.scanSerialNumber = async (req, res) => {
         SELECT COUNT(*) AS scannedQty FROM Trans_ProductSN
         WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
       `);
-    const scannedQty = countResult.recordset[0].scannedQty;
+    const scannedQtyAfter = countResultAfter.recordset[0].scannedQty;
 
-
-      await pool.request()
-    .input('saleOrderNo', sql.VarChar, saleOrderNo)
-    .input('productId', sql.VarChar, productId)
-    .input('index', sql.Int, index)
-    .input('qty', sql.Int, scannedQty)
-    .query(`
-      UPDATE Trans_PickingCheckDetail
-      SET F_PIQty = @qty
-      WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
-    `);
-
-    const qtyResult = await pool.request()
+    await pool.request()
       .input('saleOrderNo', sql.VarChar, saleOrderNo)
       .input('productId', sql.VarChar, productId)
       .input('index', sql.Int, index)
+      .input('qty', sql.Int, scannedQtyAfter)
       .query(`
-        SELECT F_Qty FROM Trans_PickingCheckDetail
+        UPDATE Trans_PickingCheckDetail
+        SET F_PIQty = @qty
         WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
       `);
-    const requiredQty = qtyResult.recordset[0].F_Qty;
 
-    if (scannedQty >= requiredQty) {
+    if (scannedQtyAfter >= requiredQty) {
       await pool.request()
         .input('saleOrderNo', sql.VarChar, saleOrderNo)
         .input('productId', sql.VarChar, productId)
@@ -93,10 +106,11 @@ exports.scanSerialNumber = async (req, res) => {
     }
 
     res.json({
+      success: true,
       message: 'Scan saved successfully',
-      scannedQty,
+      scannedQty: scannedQtyAfter,
       requiredQty,
-      isComplete: scannedQty >= requiredQty
+      isComplete: scannedQtyAfter >= requiredQty
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
