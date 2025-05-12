@@ -30,23 +30,6 @@ exports.getOrderDetails = async (req, res) => {
       `);
 
 
-
-    // .query(`
-    //   SELECT d.*, 
-    //     F_Qty - ISNULL(s.f_Count, 0) AS RemainingQty
-    //   FROM Trans_PickingCheckDetail d
-    //   LEFT JOIN (
-    //     SELECT F_SaleOrderNo, F_ProductId, F_Index, COUNT(*) AS f_Count
-    //     FROM Trans_ProductSN
-    //     GROUP BY F_SaleOrderNo, F_ProductId, F_Index
-    //   ) s
-    //   ON s.F_SaleOrderNo = d.F_SaleOrderNo
-    //     AND s.F_ProductId = d.F_ProductId
-    //     AND s.F_Index = d.F_Index
-    //   WHERE d.F_SaleOrderNo = @saleOrderNo
-    // `);
-
-
     res.json(result.recordset);
   } catch (err) {
     res.status(500).json({ error: err.message });
