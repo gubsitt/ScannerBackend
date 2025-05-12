@@ -48,8 +48,8 @@ exports.scanSerialNumber = async (req, res) => {
       .input('index', sql.Int, index)
       .input('productSN', sql.VarChar, productSN)
       .query(`
-        INSERT INTO Trans_ProductSN (F_SaleOrderNo, F_ProductId, F_Index, F_ProductSN)
-        VALUES (@saleOrderNo, @productId, @index, @productSN)
+        INSERT INTO Trans_ProductSN (F_SaleOrderNo, F_ProductId, F_Index, F_ProductSN, F_PostInvoiceNo)
+        VALUES (@saleOrderNo, @productId, @index, @productSN, 'Wait')
       `);
 
     const countResultAfter = await pool.request()
