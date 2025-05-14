@@ -5,7 +5,7 @@ const { scanSerialNumber,getScannedByOrder,getAllScannedSNs,deleteScannedSN } = 
 
 router.post('/scan-sn', scanSerialNumber);
 router.get('/scanned/:saleOrderNo', getScannedByOrder);
-router.get('/scanned-all',getAllScannedSNs);
+router.get('/scanned-all', getAllScannedSNs);
 router.delete('/delete-scanned', deleteScannedSN);
 
 module.exports = router;

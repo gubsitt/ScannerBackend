@@ -28,9 +28,18 @@ exports.getOrderDetails = async (req, res) => {
         and Trans_ProductSN.F_Index =Trans_PickingCheckDetail.F_Index
         WHERE Trans_PickingCheckDetail.F_SaleOrderNo = @saleOrderNo
       `);
+      
+ const items = result.recordset.map(row => {
+  const productId = row.F_ProductId || row.F_ProductID;
+  return {
+    ...row,
+    imagePath: productId
+      ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
+      : null
+  };
+});
 
-
-    res.json(result.recordset);
+res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

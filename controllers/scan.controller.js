@@ -62,16 +62,16 @@ exports.scanSerialNumber = async (req, res) => {
       `);
     const scannedQtyAfter = countResultAfter.recordset[0].scannedQty;
 
-    await pool.request()
-      .input('saleOrderNo', sql.VarChar, saleOrderNo)
-      .input('productId', sql.VarChar, productId)
-      .input('index', sql.Int, index)
-      .input('qty', sql.Int, scannedQtyAfter)
-      .query(`
-        UPDATE Trans_PickingCheckDetail
-        SET F_PIQty = @qty
-        WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
-      `);
+    // await pool.request()
+    //   .input('saleOrderNo', sql.VarChar, saleOrderNo)
+    //   .input('productId', sql.VarChar, productId)
+    //   .input('index', sql.Int, index)
+    //   .input('qty', sql.Int, scannedQtyAfter)
+    //   .query(`
+    //     UPDATE Trans_PickingCheckDetail
+    //     SET F_PIQty = @qty
+    //     WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
+    //   `);
 
     if (scannedQtyAfter >= requiredQty) {
       await pool.request()
@@ -235,16 +235,16 @@ exports.deleteScannedSN = async (req, res) => {
       `);
     const scannedQty = countResult.recordset[0].scannedQty;
 
-    await pool.request()
-      .input('saleOrderNo', sql.VarChar, saleOrderNo)
-      .input('productId', sql.VarChar, productId)
-      .input('index', sql.Int, index)
-      .input('qty', sql.Int, scannedQty)
-      .query(`
-        UPDATE Trans_PickingCheckDetail
-        SET F_PIQty = @qty
-        WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
-      `);
+    // await pool.request()
+    //   .input('saleOrderNo', sql.VarChar, saleOrderNo)
+    //   .input('productId', sql.VarChar, productId)
+    //   .input('index', sql.Int, index)
+    //   .input('qty', sql.Int, scannedQty)
+    //   .query(`
+    //     UPDATE Trans_PickingCheckDetail
+    //     SET F_PIQty = @qty
+    //     WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
+    //   `);
 
     const qtyResult = await pool.request()
       .input('saleOrderNo', sql.VarChar, saleOrderNo)
