@@ -8,7 +8,7 @@ exports.getOrderDetails = async (req, res) => {
 
     const result = await pool.request()
       .input('saleOrderNo', sql.VarChar, saleOrderNo)
-      // .query(`
+         // .query(
       //   SELECT *,
       //     F_PIQty AS ScannedQty,
       //     CASE 
@@ -17,29 +17,39 @@ exports.getOrderDetails = async (req, res) => {
       //     END AS RemainingQty
       //   FROM Trans_PickingCheckDetail
       //   WHERE F_SaleOrderNo = @saleOrderNo
-      // `);
+      // );
       .query(`
-     select Trans_PickingCheckDetail.*, 
-      F_Qty - isnull(f_Count, 0) as RemainingQty from Trans_PickingCheckDetail 
-        left join (select F_SaleOrderNo, F_ProductID,F_Index, COUNT(*) as 
-        f_Count from Trans_ProductSN group by F_SaleOrderNo, F_ProductID,F_Index) 
-        as Trans_ProductSN on Trans_ProductSN.F_SaleOrderNo = Trans_PickingCheckDetail.F_SaleOrderNo 
-        and Trans_ProductSN.F_ProductID = Trans_PickingCheckDetail.F_ProductID 
-        and Trans_ProductSN.F_Index =Trans_PickingCheckDetail.F_Index
+        SELECT 
+          Trans_PickingCheckDetail.*,
+          F_Qty - ISNULL(f_Count, 0) AS RemainingQty
+        FROM Trans_PickingCheckDetail
+        LEFT JOIN (
+          SELECT 
+            F_SaleOrderNo, 
+            F_ProductID, 
+            F_Index, 
+            COUNT(*) AS f_Count
+          FROM Trans_ProductSN
+          GROUP BY F_SaleOrderNo, F_ProductID, F_Index
+        ) AS Trans_ProductSN 
+          ON Trans_ProductSN.F_SaleOrderNo = Trans_PickingCheckDetail.F_SaleOrderNo 
+          AND Trans_ProductSN.F_ProductID = Trans_PickingCheckDetail.F_ProductID 
+          AND Trans_ProductSN.F_Index = Trans_PickingCheckDetail.F_Index
         WHERE Trans_PickingCheckDetail.F_SaleOrderNo = @saleOrderNo
       `);
-      
- const items = result.recordset.map(row => {
-  const productId = row.F_ProductId || row.F_ProductID;
-  return {
-    ...row,
-    imagePath: productId
-      ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
-      : null
-  };
-});
 
-res.json(items);
+    const items = result.recordset.map(row => {
+      const productId = row.F_ProductId || row.F_ProductID;
+
+      return {
+        ...row,
+        imagePath: productId
+          ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
+          : null
+      };
+    });
+
+    res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
