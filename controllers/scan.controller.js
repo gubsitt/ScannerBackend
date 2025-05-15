@@ -126,7 +126,6 @@ exports.getAllScannedSNs = async (req, res) => {
       SELECT sn.F_SaleOrderNo, sn.F_ProductId, sn.F_Index, sn.F_ProductSN
       FROM Trans_ProductSN sn
       INNER JOIN Trans_PickingCheckHead h ON sn.F_SaleOrderNo = h.F_SaleOrderNo
-      WHERE CAST(h.F_SendDate AS DATE) = CAST(GETDATE() AS DATE)
       ORDER BY sn.F_SaleOrderNo DESC, sn.F_Index
     `);
 
