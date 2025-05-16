@@ -5,12 +5,12 @@ exports.getOrders = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().query(`
-      SELECT * FROM Trans_PickingCheckHead
+      SELECT * FROM View_PickingCheckHead
     `);
 
     const detailResult = await pool.request().query(`
       SELECT F_SaleOrderNo, COUNT(*) AS itemCount
-      FROM Trans_PickingCheckDetail
+      FROM View_PickingCheckDetail
       GROUP BY F_SaleOrderNo
     `);
 
@@ -63,7 +63,7 @@ exports.getOrders = async (req, res) => {
       const result = await pool
         .request()
         .input('saleOrderNo', sql.VarChar, saleOrderNo)
-        .query('SELECT * FROM Trans_PickingCheckHead WHERE F_SaleOrderNo = @saleOrderNo');
+        .query('SELECT * FROM View_PickingCheckHead WHERE F_SaleOrderNo = @saleOrderNo');
   
       res.json(result.recordset[0] || {});
     } catch (err) {

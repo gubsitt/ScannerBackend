@@ -4,7 +4,7 @@ exports.searchOrder = async (req, res) => {
   const { keyword } = req.query;
   try {
     const pool = await poolPromise;
-    let query = 'SELECT * FROM Trans_PickingCheckHead WHERE 1=1';
+    let query = 'SELECT * FROM View_PickingCheckHead WHERE 1=1';
 
     if (keyword) {
       query += ' AND (F_SaleOrderNo LIKE \'%\' + @keyword + \'%\' OR F_CustomerName LIKE N\'%\' + @keyword + \'%\')';
@@ -24,7 +24,7 @@ exports.searchOrderDetails = async (req, res) => {
     const { keyword, saleOrderNo } = req.query;
     try {
       const pool = await poolPromise;
-      let query = 'SELECT * FROM Trans_PickingCheckDetail WHERE 1=1';
+      let query = 'SELECT * FROM View_PickingCheckDetail WHERE 1=1';
   
       if (saleOrderNo) {
         query += ' AND F_SaleOrderNo = @saleOrderNo';

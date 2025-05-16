@@ -20,9 +20,9 @@ exports.getOrderDetails = async (req, res) => {
       // );
       .query(`
         SELECT 
-          Trans_PickingCheckDetail.*,
+          View_PickingCheckDetail.*,
           F_Qty - ISNULL(f_Count, 0) AS RemainingQty
-        FROM Trans_PickingCheckDetail
+        FROM View_PickingCheckDetail
         LEFT JOIN (
           SELECT 
             F_SaleOrderNo, 
@@ -32,10 +32,10 @@ exports.getOrderDetails = async (req, res) => {
           FROM Trans_ProductSN
           GROUP BY F_SaleOrderNo, F_ProductID, F_Index
         ) AS Trans_ProductSN 
-          ON Trans_ProductSN.F_SaleOrderNo = Trans_PickingCheckDetail.F_SaleOrderNo 
-          AND Trans_ProductSN.F_ProductID = Trans_PickingCheckDetail.F_ProductID 
-          AND Trans_ProductSN.F_Index = Trans_PickingCheckDetail.F_Index
-        WHERE Trans_PickingCheckDetail.F_SaleOrderNo = @saleOrderNo
+          ON Trans_ProductSN.F_SaleOrderNo = View_PickingCheckDetail.F_SaleOrderNo 
+          AND Trans_ProductSN.F_ProductID = View_PickingCheckDetail.F_ProductID 
+          AND Trans_ProductSN.F_Index = View_PickingCheckDetail.F_Index
+        WHERE View_PickingCheckDetail.F_SaleOrderNo = @saleOrderNo
       `);
 
     const items = result.recordset.map(row => {

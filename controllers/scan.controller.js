@@ -15,7 +15,7 @@ exports.scanSerialNumber = async (req, res) => {
       .input('productId', sql.VarChar, productId)
       .input('index', sql.Int, index)
       .query(`
-        SELECT F_Qty FROM Trans_PickingCheckDetail
+        SELECT F_Qty FROM View_PickingCheckDetail
         WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
       `);
     const requiredQty = qtyResult.recordset[0]?.F_Qty;
@@ -88,7 +88,7 @@ exports.scanSerialNumber = async (req, res) => {
         .input('saleOrderNo', sql.VarChar, saleOrderNo)
         .query(`
           SELECT COUNT(*) AS notDone
-          FROM Trans_PickingCheckDetail
+          FROM View_PickingCheckDetail
           WHERE F_SaleOrderNo = @saleOrderNo AND F_CheckSNStatus = 0
         `);
 
@@ -125,7 +125,7 @@ exports.getAllScannedSNs = async (req, res) => {
     const result = await pool.request().query(`
       SELECT sn.F_SaleOrderNo, sn.F_ProductId, sn.F_Index, sn.F_ProductSN
       FROM Trans_ProductSN sn
-      INNER JOIN Trans_PickingCheckHead h ON sn.F_SaleOrderNo = h.F_SaleOrderNo
+      INNER JOIN View_PickingCheckHead h ON sn.F_SaleOrderNo = h.F_SaleOrderNo
       ORDER BY sn.F_SaleOrderNo DESC, sn.F_Index
     `);
 
@@ -176,7 +176,7 @@ exports.getAllScannedSNs = async (req, res) => {
           .input('index', sql.Int, F_Index)
           .query(`
             SELECT F_Qty, F_Desciption
-            FROM Trans_PickingCheckDetail
+            FROM View_PickingCheckDetail
             WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
           `);
   
@@ -250,7 +250,7 @@ exports.deleteScannedSN = async (req, res) => {
       .input('productId', sql.VarChar, productId)
       .input('index', sql.Int, index)
       .query(`
-        SELECT F_Qty FROM Trans_PickingCheckDetail
+        SELECT F_Qty FROM View_PickingCheckDetail
         WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
       `);
     const requiredQty = qtyResult.recordset[0]?.F_Qty;
@@ -271,7 +271,7 @@ exports.deleteScannedSN = async (req, res) => {
       .input('saleOrderNo', sql.VarChar, saleOrderNo)
       .query(`
         SELECT COUNT(*) AS notDone
-        FROM Trans_PickingCheckDetail
+        FROM View_PickingCheckDetail
         WHERE F_SaleOrderNo = @saleOrderNo AND F_CheckSNStatus = 0
       `);
 
