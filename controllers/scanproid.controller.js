@@ -13,7 +13,18 @@ exports.scanProductId = async (req, res) => {
     if (result.recordset.length === 0) {
       return res.status(404).json({ error: 'ไม่พบข้อมูลสินค้า' });
     }
-    res.json(result.recordset);
+
+      const items = result.recordset.map(row => {
+      const productId = row.F_ProductId || row.F_ProductID;
+
+      return {
+        ...row,
+        imagePath: productId
+          ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
+          : null
+      };
+    });
+    res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
