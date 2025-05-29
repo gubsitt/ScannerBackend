@@ -3,21 +3,15 @@ const { sql, poolPromise } = require('../config/dbConfig');
 exports.getOrderDetails = async (req, res) => {
   const { saleOrderNo } = req.params;
 
+  console.log(`📥 GET /getOrderDetails/${saleOrderNo}`);
+
   try {
     const pool = await poolPromise;
 
+    console.log(`🔍 Querying details for saleOrderNo: ${saleOrderNo}`);
+
     const result = await pool.request()
       .input('saleOrderNo', sql.VarChar, saleOrderNo)
-         // .query(
-      //   SELECT *,
-      //     F_PIQty AS ScannedQty,
-      //     CASE 
-      //       WHEN F_Qty - F_PIQty < 0 THEN 0
-      //       ELSE F_Qty - F_PIQty
-      //     END AS RemainingQty
-      //   FROM Trans_PickingCheckDetail
-      //   WHERE F_SaleOrderNo = @saleOrderNo
-      // );
       .query(`
         SELECT 
           View_PickingCheckDetail.*,
@@ -38,6 +32,8 @@ exports.getOrderDetails = async (req, res) => {
         WHERE View_PickingCheckDetail.F_SaleOrderNo = @saleOrderNo
       `);
 
+    console.log(`✅ Found ${result.recordset.length} items for saleOrderNo: ${saleOrderNo}`);
+
     const items = result.recordset.map(row => {
       const productId = row.F_ProductId || row.F_ProductID;
 
@@ -51,6 +47,7 @@ exports.getOrderDetails = async (req, res) => {
 
     res.json(items);
   } catch (err) {
+    console.error(`💥 Error in getOrderDetails for saleOrderNo: ${saleOrderNo}`, err);
     res.status(500).json({ error: err.message });
   }
 };

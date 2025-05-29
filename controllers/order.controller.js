@@ -1,13 +1,17 @@
 const { sql, poolPromise } = require('../config/dbConfig');
 
-
 exports.getOrders = async (req, res) => {
+  console.log('📥 GET /getOrders called with query:', req.query);
+
   try {
     const pool = await poolPromise;
+
+    console.log('🔍 Querying View_PickingCheckHead...');
     const result = await pool.request().query(`
       SELECT * FROM View_PickingCheckHead
     `);
 
+    console.log('🔍 Querying item count from View_PickingCheckDetail...');
     const detailResult = await pool.request().query(`
       SELECT F_SaleOrderNo, COUNT(*) AS itemCount
       FROM View_PickingCheckDetail
@@ -46,27 +50,40 @@ exports.getOrders = async (req, res) => {
     }));
 
     if (req.query.color) {
+      console.log(`🎨 Filtering orders by color: ${req.query.color}`);
       orders = orders.filter(order => order.color === req.query.color);
     }
 
+    console.log(`✅ Returning ${orders.length} orders`);
     res.json(orders);
   } catch (err) {
+    console.error('💥 Error in getOrders:', err);
     res.status(500).json({ error: err.message });
   }
 };
 
+exports.getOrder = async (req, res) => {
+  const { saleOrderNo } = req.params;
+  console.log(`📥 GET /getOrder/${saleOrderNo}`);
 
-  exports.getOrder = async (req, res) => {
-    const { saleOrderNo } = req.params;
-    try {
-      const pool = await poolPromise;
-      const result = await pool
-        .request()
-        .input('saleOrderNo', sql.VarChar, saleOrderNo)
-        .query('SELECT * FROM View_PickingCheckHead WHERE F_SaleOrderNo = @saleOrderNo');
-  
-      res.json(result.recordset[0] || {});
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+  try {
+    const pool = await poolPromise;
+    console.log(`🔍 Querying View_PickingCheckHead for saleOrderNo: ${saleOrderNo}`);
+
+    const result = await pool
+      .request()
+      .input('saleOrderNo', sql.VarChar, saleOrderNo)
+      .query('SELECT * FROM View_PickingCheckHead WHERE F_SaleOrderNo = @saleOrderNo');
+
+    if (result.recordset.length > 0) {
+      console.log('✅ Found order:', result.recordset[0]);
+    } else {
+      console.warn('⚠️ No order found for:', saleOrderNo);
     }
-  };
+
+    res.json(result.recordset[0] || {});
+  } catch (err) {
+    console.error('💥 Error in getOrder:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
