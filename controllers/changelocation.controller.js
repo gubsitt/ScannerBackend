@@ -10,6 +10,14 @@ exports.changeLocation = async (req, res) => {
   try {
     const pool = await poolPromise;
 
+    const locationResult = await pool.request()
+      .input('locationId', sql.VarChar, newLocation)
+      .query('SELECT 1 FROM Sys_Location WHERE F_LocationId = @locationId');
+
+    if (locationResult.recordset.length === 0) {
+      return res.status(404).json({ error: 'ไม่พบ Location นี้ในระบบ' });
+    }
+
     const result = await pool.request()
       .input('productId', sql.VarChar, productId)
       .query('SELECT COUNT(*) AS count FROM Sys_Product WHERE F_ProductID = @productId');

@@ -71,3 +71,49 @@ exports.searchScannedSN = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.searchStockBalance = async (req, res) => {
+  const { keyword } = req.query;
+  try {
+    const pool = await poolPromise;
+
+    let query = `
+      SELECT * 
+      FROM View_StockBalance
+      WHERE 1=1
+    `;
+
+    if (keyword) {
+      query += `
+        AND (
+          F_ProductId LIKE '%' + @keyword + '%' OR 
+          F_ProductName LIKE N'%' + @keyword + '%'
+        )
+      `;
+    }
+
+    const request = pool.request();
+    if (keyword) {
+      request.input('keyword', sql.NVarChar, keyword);
+    }
+
+    const result = await request.query(query);
+
+      const items = result.recordset.map(row => {
+      const productId = row.F_ProductId || row.F_ProductID;
+
+      return {
+        ...row,
+        imagePath: productId
+          ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
+          : null
+      };
+    });
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+
