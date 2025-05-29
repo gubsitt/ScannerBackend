@@ -119,7 +119,7 @@ exports.confirmStockChecked = async (req, res) => {
     const receiveFGNo = `${prefix}${runNumber}`;
     const receiveStatus = 1;
     const warehouseId = view.F_Location === 'NONE' ? '01' : '99'; 
-    const runNo = runNumber;
+    const runNo = `${now.format('YYYYMMDD')}${runNumber}`;
     const docEdit = 0;
 
     await pool.request()
