@@ -24,7 +24,19 @@ exports.getProductsByLocation = async (req, res) => {
       console.warn('❌ ไม่พบข้อมูลสินค้าใน Location นี้');
       return res.status(404).json({ error: 'ไม่พบข้อมูลสินค้าใน Location นี้' });
     }
-    res.json(result.recordset);
+
+        const items = result.recordset.map(row => {
+      const productId = row.F_ProductId || row.F_ProductID;
+      return {
+        ...row,
+        imagePath: productId
+          ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
+          : null
+      };
+    });
+
+    console.log(`✅ พบ ${items.length} รายการสินค้าใน Location: ${location}`);
+    res.json(items);
   } catch (err) {
     console.error('💥 error:', err);
     res.status(500).json({ error: err.message });
