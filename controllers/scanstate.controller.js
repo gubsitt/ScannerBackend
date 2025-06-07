@@ -25,11 +25,29 @@ exports.getProcessOrderDetail = async (req, res) => {
       return res.status(404).json({ error: 'ไม่พบข้อมูล' });
     }
 
-    const today = new Date();
-    today.setHours(0,0,0,0);
+    function getStatusColor(status) {
+      const statusColorMap = {
+        '1': 'red',
+        '2': 'red',
+        '3': 'gold',
+        'C': 'gold',
+        'CD': 'gold',
+        'W': 'darkorange',
+        'WC': 'darkorange',
+        '4': 'blue',
+        '5': 'lime',
+        '6': 'green',
+        '7': 'black',
+        'WP': 'black',
+        'WB': 'black'
+      };
+      return status && statusColorMap[status] ? statusColorMap[status] : '';
+    }
 
-    function getColor(sendDate) {
+    function getDateColor(sendDate) {
       if (!sendDate) return '';
+      const today = new Date();
+      today.setHours(0,0,0,0);
       const date = new Date(sendDate);
       date.setHours(0,0,0,0);
       const diff = Math.floor((date - today) / (1000 * 60 * 60 * 24));
@@ -49,7 +67,8 @@ exports.getProcessOrderDetail = async (req, res) => {
       const productId = row.F_ProductId || row.F_ProductID;
       return {
         ...row,
-        color: getColor(row.F_SendDate),
+        statusColor: getStatusColor(row.F_Status),
+        Color: getDateColor(row.F_SendDate),
         imagePath: productId
           ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
           : null
