@@ -20,7 +20,7 @@ exports.scanSerialNumber = async (req, res) => {
         SELECT F_Qty FROM View_PickingCheckDetail
         WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
       `);
-    const requiredQty = qtyResult.recordset[0]?.F_Qty;
+const requiredQty = (qtyResult.recordset || [])[0] && qtyResult.recordset[0].F_Qty;
     console.log('🔢 RequiredQty:', requiredQty);
 
     const countResult = await pool.request()
@@ -31,7 +31,8 @@ exports.scanSerialNumber = async (req, res) => {
         SELECT COUNT(*) AS scannedQty FROM Trans_ProductSN
         WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
       `);
-    const scannedQty = countResult.recordset[0]?.scannedQty;
+    const scannedQty = (countResult.recordset || [])[0] && countResult.recordset[0].scannedQty;
+
     console.log('🔄 AlreadyScannedQty:', scannedQty);
 
     if (scannedQty >= requiredQty) {
@@ -249,7 +250,7 @@ exports.deleteScannedSN = async (req, res) => {
         SELECT F_Qty FROM View_PickingCheckDetail
         WHERE F_SaleOrderNo = @saleOrderNo AND F_ProductId = @productId AND F_Index = @index
       `);
-    const requiredQty = qtyResult.recordset[0]?.F_Qty;
+const requiredQty = (qtyResult.recordset || [])[0] && qtyResult.recordset[0].F_Qty;
 
     if (scannedQty < requiredQty) {
       await pool.request()
