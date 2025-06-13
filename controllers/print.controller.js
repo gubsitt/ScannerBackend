@@ -1,12 +1,12 @@
 const { sql, poolPromise } = require('../config/dbConfig');
 
 exports.printAndLog = async (req, res) => {
-  const { processOrderId, employeeName } = req.body;
+  const { processOrderId, employeeName, f_PrintDestination } = req.body;
   console.log('📥 รับค่า processOrderId:', processOrderId);
 
-  if (!processOrderId || !employeeName ) {
-    console.warn('⚠️ ไม่ได้ระบุ processOrderId หรือ employeeName');
-    return res.status(400).json({ error: 'กรุณาระบุ processOrderId และ employeeName' });
+  if (!processOrderId || !employeeName || !f_PrintDestination) {
+    console.warn('⚠️ ไม่ได้ระบุ processOrderId ,employeeName และ f_PrintDestination');
+    return res.status(400).json({ error: 'กรุณาระบุ processOrderId ,employeeName และ f_PrintDestination' });
   }
 
   try {
@@ -15,7 +15,7 @@ exports.printAndLog = async (req, res) => {
     console.log('🔍 ตรวจสอบรายการ print ที่ยังไม่สำเร็จ...');
     const printParameter = `${processOrderId},${employeeName}`;
     const checkResult = await pool.request()
-      .input('printParameter', sql.VarChar, printParameter)
+      .input('printParameter', sql.NVarChar, printParameter)
       .query(`
         SELECT TOP 1 *
         FROM Trans_PrintTask
@@ -33,7 +33,7 @@ exports.printAndLog = async (req, res) => {
       f_PrintTaskDate: new Date(),
       f_PrintParameter: `${processOrderId},${employeeName}`,
       f_PrintReport: 'Production_Replace',
-      f_PrintDestination: 'PDFL1',
+      f_PrintDestination: f_PrintDestination,
       f_PrintTaskStatus: 0
     };
 
@@ -43,7 +43,7 @@ exports.printAndLog = async (req, res) => {
       .input('f_PrintTaskDate', sql.DateTime, printTaskData.f_PrintTaskDate)
       .input('f_PrintParameter', sql.NVarChar, printTaskData.f_PrintParameter)
       .input('f_PrintReport', sql.VarChar, printTaskData.f_PrintReport)
-      .input('f_PrintDestination', sql.VarChar, printTaskData.f_PrintDestination)
+      .input('f_PrintDestination', sql.NVarChar, printTaskData.f_PrintDestination)
       .input('f_PrintTaskStatus', sql.Int, printTaskData.f_PrintTaskStatus)
       .query(`
         INSERT INTO Trans_PrintTask (f_PrintTaskDate, f_PrintReport, f_PrintParameter, f_PrintDestination, f_PrintTaskStatus)
