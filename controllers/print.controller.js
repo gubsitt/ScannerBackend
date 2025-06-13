@@ -42,7 +42,7 @@ exports.printAndLog = async (req, res) => {
     await pool.request()
       .input('f_PrintTaskDate', sql.DateTime, printTaskData.f_PrintTaskDate)
       .input('f_PrintParameter', sql.NVarChar, printTaskData.f_PrintParameter)
-      .input('f_PrintReport', sql.VarChar, printTaskData.f_PrintReport)
+      .input('f_PrintReport', sql.NVarChar, printTaskData.f_PrintReport)
       .input('f_PrintDestination', sql.NVarChar, printTaskData.f_PrintDestination)
       .input('f_PrintTaskStatus', sql.Int, printTaskData.f_PrintTaskStatus)
       .query(`
