@@ -33,7 +33,7 @@ exports.printAndLog = async (req, res) => {
       f_PrintTaskDate: new Date(),
       f_PrintParameter: `${processOrderId},${employeeName}`,
       f_PrintReport: 'Production_Replace',
-      f_PrintDestination: 'RDSMK',
+      f_PrintDestination: 'PDFL1',
       f_PrintTaskStatus: 0
     };
 
