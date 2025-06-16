@@ -1,12 +1,12 @@
 const { sql, poolPromise } = require('../config/dbConfig');
 
 exports.printAndLog = async (req, res) => {
-  const { processOrderId, employeeName, f_PrintDestination } = req.body;
+  const { processOrderId, employeeName, PrinterId } = req.body;
   console.log('📥 รับค่า processOrderId:', processOrderId);
 
-  if (!processOrderId || !employeeName || !f_PrintDestination) {
+  if (!processOrderId || !employeeName || !PrinterId) {
     console.warn('⚠️ ไม่ได้ระบุ processOrderId ,employeeName และ f_PrintDestination');
-    return res.status(400).json({ error: 'กรุณาระบุ processOrderId ,employeeName และ f_PrintDestination' });
+    return res.status(400).json({ error: 'กรุณาระบุ processOrderId ,employeeName และ PrinterId' });
   }
 
   try {
@@ -33,7 +33,7 @@ exports.printAndLog = async (req, res) => {
       f_PrintTaskDate: new Date(),
       f_PrintParameter: `${processOrderId},${employeeName}`,
       f_PrintReport: 'Production_Replace',
-      f_PrintDestination: f_PrintDestination,
+      f_PrintDestination: PrinterId,
       f_PrintTaskStatus: 0
     };
 
@@ -53,6 +53,19 @@ exports.printAndLog = async (req, res) => {
     console.log('✅ บันทึก log print สำเร็จ:', printTaskData);
 
     res.json({ message: 'บันทึก log print สำเร็จ', data: printTaskData });
+  } catch (err) {
+    console.error('💥 error:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getPrinters = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT * FROM Sys_PrinterList
+    `);
+    res.json({ printers: result.recordset });
   } catch (err) {
     console.error('💥 error:', err);
     res.status(500).json({ error: err.message });
