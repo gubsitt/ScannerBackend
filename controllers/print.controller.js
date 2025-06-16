@@ -65,6 +65,7 @@ exports.getPrinters = async (req, res) => {
     const result = await pool.request().query(`
       SELECT * FROM Sys_PrinterList
     `);
+        console.log('📦 ผลลัพธ์ Printer:', result.recordset);
     res.json({ printers: result.recordset });
   } catch (err) {
     console.error('💥 error:', err);
