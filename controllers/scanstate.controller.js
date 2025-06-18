@@ -63,17 +63,47 @@ exports.getProcessOrderDetail = async (req, res) => {
       return '';
     }
 
+
+    //กำหนดผลลัพธ์การตรวจสอบตามประเภทการพิมพ์และสี
     const orders = result.recordset.map(row => {
-      const productId = row.F_ProductId || row.F_ProductID;
-      return {
-        ...row,
-        statusColor: getStatusColor(row.F_Status),
-        Color: getDateColor(row.F_SendDate),
-        imagePath: productId
-          ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
-          : null
-      };
-    });
+  const productId = row.F_ProductId || row.F_ProductID;
+
+  //เอาไว้ตรวจสอบครับกัส
+  let checkPlate = row.F_CheckPlate;
+  let checkBlock = row.F_CheckBlock;
+  let checkColour = row.F_CheckColour;
+
+  if (row.F_Product_PrintTypeId === 'P1') {
+    checkPlate = 'Pass';
+    checkColour = 'Pass';
+  } else if (row.F_Product_PrintTypeId === 'P6') {
+    checkPlate = 'Pass';
+    checkBlock = 'Pass';
+    checkColour = 'Pass';
+  } else if (row.F_Product_PrintTypeId === 'P4' || row.F_Product_PrintTypeId === 'P7') {
+    checkBlock = 'Pass';
+  } else {
+    if (row.F_ColourOrBank === 'BLANK') {
+      checkPlate = 'Pass';
+      checkColour = 'Pass';
+    }
+  }
+
+  return {
+    ...row,
+    statusColor: getStatusColor(row.F_Status),
+    Color: getDateColor(row.F_SendDate),
+    imagePath: productId
+      ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
+      : null,
+
+    //แนบค่าใหม่ที่ผ่านการปรับ logic
+    F_CheckPlate: checkPlate,
+    F_CheckBlock: checkBlock,
+    F_CheckColour: checkColour,
+  };
+});
+
 
     res.json(orders);
   } catch (err) {
