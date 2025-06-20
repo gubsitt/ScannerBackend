@@ -1,12 +1,12 @@
 const { sql, poolPromise } = require('../config/dbConfig');
 
 exports.printAndLog = async (req, res) => {
-  const { processOrderId, employeeName, PrinterId } = req.body;
+  const { processOrderId, employeeName, PrinterId,PrintReport } = req.body;
   console.log('📥 รับค่า processOrderId:', processOrderId);
 
-  if (!processOrderId || !employeeName || !PrinterId) {
-    console.warn('⚠️ ไม่ได้ระบุ processOrderId ,employeeName และ f_PrintDestination');
-    return res.status(400).json({ error: 'กรุณาระบุ processOrderId ,employeeName และ PrinterId' });
+  if (!processOrderId || !employeeName || !PrinterId || !PrintReport) {
+    console.warn('⚠️ ไม่ได้ระบุ processOrderId ,employeeName ,PrinterId และ PrintReport');
+    return res.status(400).json({ error: 'กรุณาระบุ processOrderId ,employeeName ,PrinterId และ PrintReport' });
   }
 
   try {
@@ -32,7 +32,7 @@ exports.printAndLog = async (req, res) => {
     const printTaskData = {
       f_PrintTaskDate: new Date(),
       f_PrintParameter: `${processOrderId},${employeeName}`,
-      f_PrintReport: 'Production_Replace',
+      f_PrintReport: PrintReport,
       f_PrintDestination: PrinterId,
       f_PrintTaskStatus: 0
     };
