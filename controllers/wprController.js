@@ -30,27 +30,39 @@ exports.getWprData = async (req, res) => {
 };
 
 exports.getWprDetail = async (req, res) => {
-    const reqNo = req.params.reqNo;
+  const reqNo = req.params.reqNo;
 
-    try {
-        const pool = await poolPromise;
-        const result = await pool.request()
-            .input('reqNo', sql.VarChar, reqNo)
-            .query(`
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('reqNo', sql.VarChar, reqNo)
+      .query(`
         SELECT [F_WdProcessReqNo]
-      ,[F_Index]
-      ,[F_ProductId]
-      ,[F_Desciption]
-      ,[F_Qty]
-      ,[F_UnitName]
-      ,[F_Remark]
-      ,[F_Location]
+              ,[F_Index]
+              ,[F_ProductId]
+              ,[F_Desciption]
+              ,[F_Qty]
+              ,[F_UnitName]
+              ,[F_Remark]
+              ,[F_Location]
         FROM [WMS_NewWarehouse].[dbo].[View_WithdrawalProcessReqDetail]
         WHERE F_WdProcessReqNo = @reqNo
       `);
-        res.json(result.recordset);
-    } catch (err) {
-        console.error('Error fetching WPR detail:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+
+    const itemsWithImage = result.recordset.map(row => {
+      const productId = row.F_ProductId;
+      return {
+        ...row,
+        imagePath: productId
+          ? `http://172.16.10.8/${productId}/${productId}-WDFile.jpg`
+          : null
+      };
+    });
+
+    res.json(itemsWithImage);
+  } catch (err) {
+    console.error('Error fetching WPR detail:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
+
